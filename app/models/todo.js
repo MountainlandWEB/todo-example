@@ -1,50 +1,26 @@
-var MongoClient = require('mongodb').MongoClient;
-var ObjectId = require("mongodb").ObjectId;
-var assert = require('assert');
-var url = 'mongodb://localhost/test1';
+var mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost/test1');
 
-// Returns a random integer between min (included) and max (excluded)
-// Using Math.round() will give you a non-uniform distribution!
-function getRandomInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min)) + min;
-}
+var Todo = mongoose.model('Todo', {
+    text: String,
+    done: Boolean
+});
 
 module.exports = {
 	
 	find: function(callback){
-        MongoClient.connect(url, function(err, db) {
-            assert.equal(null, err);
-            console.log("Connected successfully to server");
-            var collection = db.collection("todos");
-            collection.find({}).toArray(function(err, todos){
-                assert.equal(err, null);
-                callback(null, todos);
-                db.close();
-            });
+        Todo.find(function(err, todos){
+           callback(null, todos);
         });
 	},
 	create: function(todo, callback){
-        MongoClient.connect(url, function(err, db) {
-            assert.equal(null, err);
-            console.log("Connected successfully to server");
-            var collection = db.collection("todos");
-            collection.insertOne(todo);
-            db.close();
+        Todo.create(todo, function(err, todo){
             module.exports.find(callback);
         });
 	},
-	remove: function(ids, callback)
-	{
-        MongoClient.connect(url, function(err, db) {
-            assert.equal(null, err);
-            console.log("Connected successfully to server");
-            var collection = db.collection("todos");
-            ids._id = new ObjectId(ids._id);
-            collection.removeMany(ids);
-            db.close();
+	remove: function(todo, callback) {
+        Todo.remove(todo, function (err) {
             module.exports.find(callback);
-        });
+        })
 	}
 };
