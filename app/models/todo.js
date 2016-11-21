@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/test1');
+var connectionString = process.env.MONGODB_URI || 'mongodb://localhost/test1';
+mongoose.connect(connectionString);
 
 var Todo = mongoose.model('Todo', {
     text: String,
